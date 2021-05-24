@@ -6,7 +6,15 @@ var router = express.Router();
 router.get('/api/ana', function(req, res, next) {
   res.send({status: true, name: "ana"})
 });
-
+router.post('/api/auth', function(req, res, next) {
+  let {username, password} = req.body;
+  if(authenticateUser(username, password)) {
+    //user authenticated
+  }else {
+    //user not autheticated
+  }
+  res.send({status: true, name: "ana"})
+});
 // localhost:3000/
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
