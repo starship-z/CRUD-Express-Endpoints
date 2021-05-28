@@ -1,5 +1,6 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
+const bcrypt = require("bcrypt");
 // /api + "/ana"
 /* GET home page. */
 // localhost:3000/api/ana
@@ -28,12 +29,15 @@ application/js
 */
 
 
-router.post('/register', function(req, res, next) {
+router.post('/register', async function(req, res, next) {
     // res.send({status: true, name: "ana"})
-    let {username, password} =  req.body; 
+    let {username, password} =  req.body;
+    password = await bcrypt.hash(password, 15); 
     let User = {
-        username: username, 
-        password: password
+        // username: username, 
+        // password: password
+        username,
+        password
     }
     users.push(User)
     res.send({status: true, User})
