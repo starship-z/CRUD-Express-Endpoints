@@ -4,7 +4,8 @@ const bcrypt = require("bcrypt");
 // /api + "/ana"
 /* GET home page. */
 // localhost:3000/api/ana
-const users = []
+const users = [];
+const loggedIn = [];
 
 router.get('/register', function(req, res, next) {
 //   res.send({status: true, name: "ana"})
@@ -28,7 +29,6 @@ application/css
 application/js
 */
 
-
 router.post('/register', async function(req, res, next) {
     // res.send({status: true, name: "ana"})
     let {username, password} =  req.body;
@@ -47,14 +47,37 @@ router.get("/viewUsers", (req, res, next) =>{
     res.send(users)
 })
 
-router.post('/auth', function(req, res, next) {
-  let {username, password} = req.body;
-  if(authenticateUser(username, password)) {
-    //user authenticated
-  }else {
-    //user not autheticated
+function getUser(username){
+  let output = users.find(user =>user.username === username);
+  if (output){return output};
+  return NULL;
+}
+
+async function authenticateUser(username, password){
+  let user = getUser(username);
+  if(user){
+    return await bcrypt.compare(password, user.password);
   }
-  res.send({status: true, name: "ana"})
+}
+
+router.post('/login', async function(req, res, next) {
+  let {username, password} = req.body;
+  try{
+    if(await authenticateUser(username, password)) {
+      let user = getUser(username);
+      loggedIn.push(user);
+      res.send({status: true, user: user});
+    }else {
+      res.send({status: false})
+    }
+  }catch(err){
+    console.log(err);
+    res.send({status: false});
+  }
 });
+
+router.get("/viewLoggedIn", (req, res, next) =>{
+  res.send(loggedIn);
+})
 
 module.exports = router;
