@@ -6,9 +6,11 @@ const bcrypt = require("bcrypt");
 // localhost:3000/api/ana
 const users = [];
 const loggedIn = [];
-
+/*
+block of commentws for a push
+*/
 router.get('/register', function(req, res, next) {
-//   res.send({status: true, name: "ana"})
+//res.send({status: true, name: "ana"})
   res.send("hello")
 
 //application/json
