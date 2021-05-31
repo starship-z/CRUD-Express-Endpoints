@@ -5,17 +5,15 @@ const bcrypt = require("bcrypt");
 /* GET home page. */
 // localhost:3000/api/ana
 const users = [];
-const loggedIn = [];
-/*
-block of commentws for a push
-*/
-router.get('/register', function(req, res, next) {
-//res.send({status: true, name: "ana"})
-  res.send("hello")
+let loggedIn = [];
 
-//application/json
-//application/html
-//application/css
+router.get('/register', function(req, res, next) {
+  //res.send({status: true, name: "ana"})
+  return res.send("hello")
+
+  //application/html
+  //application/json
+  //application/css
 });
 
 // get -> see data
@@ -34,7 +32,9 @@ application/js
 router.post('/register', async function(req, res, next) {
     // res.send({status: true, name: "ana"})
     let {username, password} =  req.body;
+    if(userExists(username)) return res.send({status: false});
     password = await bcrypt.hash(password, 15); 
+    
     let User = {
         // username: username, 
         // password: password
@@ -42,17 +42,30 @@ router.post('/register', async function(req, res, next) {
         password
     }
     users.push(User)
-    res.send({status: true, User})
+    
+    return res.send({status: true, User})
 });
 
 router.get("/viewUsers", (req, res, next) =>{
-    res.send(users)
+  return res.send(users)
 })
 
 function getUser(username){
   let output = users.find(user =>user.username === username);
   if (output){return output};
   return NULL;
+}
+
+function userExists(username){
+  let output = users.find(user =>user.username === username);
+  if (output){return true};
+  return false;
+}
+
+function loggedInUserExists(username){
+  let output = loggedIn.find(user =>user.username === username);
+  if (output){return true};
+  return false;
 }
 
 async function authenticateUser(username, password){
@@ -64,17 +77,39 @@ async function authenticateUser(username, password){
 
 router.post('/login', async function(req, res, next) {
   let {username, password} = req.body;
+  if(loggedInUserExists(username)) return res.send({status: false});
+
   try{
     if(await authenticateUser(username, password)) {
       let user = getUser(username);
       loggedIn.push(user);
-      res.send({status: true, user: user});
+      return res.send({status: true, user: user});
     }else {
-      res.send({status: false})
+      return res.send({status: false})
     }
   }catch(err){
     console.log(err);
-    res.send({status: false});
+    return res.send({status: false});
+  }
+});
+
+router.post('/logout', async function(req, res, next) {
+  let {username} = req.body;
+  if(!loggedInUserExists(username)) return res.send({status: false});
+
+  try{
+    // 
+    // user: function parameter
+    // => arrow to function 
+    // {return user.username != username}
+    // user => 
+    
+    loggedIn = loggedIn.filter(user => {return user.username != username});
+    return res.send({status: true, user: username});
+    
+  }catch(err){
+    console.log(err);
+    return res.send({status: false});
   }
 });
 
