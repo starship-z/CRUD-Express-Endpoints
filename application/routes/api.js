@@ -124,10 +124,12 @@ router.post('/logout', async function(req, res, next) {
   }
 });
 
+// log out function to not repeat code
 function logout(username){
   loggedIn = loggedIn.filter(user => {return user.username != username});
 }
 
+// delete function to not repeat code
 function deleteUser(username){
   users = users.filter(user => {return user.username != username});
 }
