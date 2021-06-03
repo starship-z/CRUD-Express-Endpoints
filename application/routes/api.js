@@ -1,6 +1,8 @@
 const express = require('express');
-const router = express.Router();
 const bcrypt = require("bcrypt");
+const router = express.Router();
+ 
+const db = require('../config/database');
 // /api + "/ana"
 /* GET home page. */
 // localhost:3000/api/ana
@@ -52,8 +54,10 @@ router.post('/register', async function(req, res, next) {
 });
 
 // view all registered users
-router.get("/viewUsers", (req, res, next) =>{
-  return res.send(users)
+router.get("/viewUsers", async (req, res, next) =>{
+  let users1 = await db.query("SELECT id, username, password from users", []);
+  
+  return res.send(users1[0]);
 })
 
 // get user by username
