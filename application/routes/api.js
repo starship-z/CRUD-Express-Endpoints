@@ -1,7 +1,8 @@
 const express = require('express');
 const bcrypt = require("bcrypt");
 const router = express.Router();
- 
+
+const Users = require('../models/Users');
 const db = require('../config/database');
 // /api + "/ana"
 /* GET home page. */
@@ -24,6 +25,7 @@ router.get('/register', function(req, res, next) {
 
 // get -> see data
 // post -> change data
+
 /*
 MIME TYPES: 
 application/php
@@ -37,32 +39,35 @@ application/js
 
 // register a user with a username and password
 router.post('/register', async function(req, res, next) {
-    // res.send({status: true, name: "ana"})
     let {username, password} =  req.body;
-    if(userExists(username)) return res.send({status: false}); // check if user exists then cannot register
-    password = await bcrypt.hash(password, 15); 
-    
-    let User = {
-        // username: username, 
-        // password: password
-        username,
-        password
+    try {
+      console.log("before")
+      let user = await Users.register(username, password);
+      console.log("after")
+      // console.log(user)
+      return res.send({status: true, user})
+    } catch(err){
+      return res.send({status: false});
     }
-    users.push(User)
-    
-    return res.send({status: true, User})
+   
 });
 
 // view all registered users
 router.get("/viewUsers", async (req, res, next) =>{
-  let users1 = await db.query("SELECT id, username, password from users", []);
-  
-  return res.send(users1[0]);
+  try {
+    let users1 = await Users.viewUsers();
+    if(!users1) return res.send({status: "No Users Found"});
+    
+    return res.send(users1[0]);
+
+  } catch(err){
+    return res.send({status: false});
+  }
 })
 
 // get user by username
 function getUser(username){
-  let output = users.find(user =>user.username === username);
+  let output = users.find(user => user.username === username);
   if (output){return output};
   return NULL;
 }
@@ -92,16 +97,13 @@ async function authenticateUser(username, password){
 // login in a user
 router.post('/login', async function(req, res, next) {
   let {username, password} = req.body;
-  if(loggedInUserExists(username)) return res.send({status: false}); // check if user is already logged in
+
+  // if(loggedInUserExists(username)) return res.send({status: false}); // check if user is already logged in
 
   try{
-    if(await authenticateUser(username, password)) {
-      let user = getUser(username);
-      loggedIn.push(user);
-      return res.send({status: true, user: user});
-    }else {
-      return res.send({status: false})
-    }
+    let [status, id] = await Users.authenticate(username, password);
+    // res.locals.userid = id; 
+    return res.send({status: status, user: id});
   }catch(err){
     console.log(err);
     return res.send({status: false});
